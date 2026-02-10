@@ -1,0 +1,152 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-form h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.subtitle {
+    color: #666;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #e1e1e1;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #357abd;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+/* HTML/CSS Validation Logic */
+
+/* 1. Only show validation styles when the user has typed something (not placeholder shown) */
+.form-group input:not(:placeholder-shown):valid {
+    border-color: #28a745;
+}
+
+.form-group input:not(:placeholder-shown):invalid {
+    border-color: #dc3545;
+    /* Shake animation on invalid could be added here if desired */
+}
+
+/* Error message styling */
+.error-text {
+    display: none;
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+}
+
+/* Show error message when input is invalid AND not showing placeholder (user typed) */
+.form-group input:not(:placeholder-shown):invalid + .error-text {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Home Page Specific Styles */
+.home-container {
+    text-align: center;
+}
+
+.welcome-header {
+    margin-bottom: 2rem;
+}
+
+.welcome-header h2 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.content-area {
+    margin-bottom: 2rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+.logout-btn {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background-color: #dc3545; /* Red for logout */
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+

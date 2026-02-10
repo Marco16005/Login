@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <form class="login-form" action="home.html">
+            <h2>Login</h2>
+            <p class="subtitle">Please enter your credentials</p>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                <span class="error-text">Please enter a valid email address</span>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="********" required minlength="8">
+                <span class="error-text">Password must be at least 8 characters</span>
+            </div>
+
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>
