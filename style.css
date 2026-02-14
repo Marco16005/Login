@@ -84,60 +84,8 @@ button:active {
 }
 
 /* ============================
-   HOME PAGE STYLES (Simplified)
+   HOME PAGE CONTENT
    ============================ */
-
-/* Distinct body background for home to differentiate from login */
-body.home-body {
-    background-color: #f8f9fa;
-    display: block; /* Overrides flex center from login */
-    height: auto;
-    min-height: 100vh;
-}
-
-/* Simple Navbar */
-.navbar {
-    background: white;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #4a90e2;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.logout-link {
-    text-decoration: none;
-    color: #666;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border: 1px solid #e1e1e1;
-    border-radius: 6px;
-    transition: all 0.3s;
-}
-
-.logout-link:hover {
-    background-color: #ffebee;
-    border-color: #ffcdd2;
-    color: #dc3545;
-}
-
-/* Main Content Area */
-.home-content {
-    max-width: 900px; /* Limits width nicely */
-    margin: 4rem auto; /* Centers horizontally + top margin */
-    padding: 0 1rem;
-    background: transparent; /* Override .container white bg */
-    box-shadow: none; /* Override .container shadow */
-}
 
 .welcome-section {
     text-align: center;
@@ -193,6 +141,171 @@ body.home-body {
     font-size: 0.9rem;
 }
 
+/* ============================
+   SHARED HEADER & FOOTER
+   ============================ */
+
+/* Page Layout */
+body.interior-page, body.home-body {
+    background-color: #f4f6f8;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+/* Header / Navbar */
+.navbar {
+    background-color: #1a202c; /* Modern Dark Theme */
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: static; /* Prevents overlap with content */
+    border-bottom: 1px solid #2d3748;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    text-decoration: none;
+}
+
+.logo i {
+    color: #63b3ed; /* Softer blue for dark background */
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #e2e8f0;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #63b3ed;
+}
+
+.logout-link {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+    padding: 0.5rem 1.25rem !important;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s ease;
+}
+
+.logout-link:hover {
+    background-color: #e53e3e;
+    border-color: #e53e3e;
+}
+
+/* Footer */
+.site-footer {
+    background-color: #1a202c;
+    color: #a0aec0;
+    padding: 3rem 1rem;
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    border-top: 1px solid #2d3748;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.footer-brand {
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.footer-brand i {
+    color: #63b3ed;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.footer-links a {
+    color: #cbd5e0;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: #63b3ed;
+}
+
+.footer-copyright {
+    color: #718096;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+}
+
+/* Remove styling that makes them look like floating white boxes */
+.home-content {
+    max-width: 1000px;
+    margin: 2rem auto 3rem;
+    padding: 0 2rem;
+    width: 100%;
+    flex: 1;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .nav-links {
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .home-content {
+        padding: 0 1rem;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+}
+
+/* Validation logic (kept at bottom) */
 /* HTML/CSS Validation Logic */
 
 /* 1. Only show validation styles when the user has typed something (not placeholder shown) */
