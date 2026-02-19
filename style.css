@@ -178,7 +178,7 @@ body.interior-page, body.home-body {
 }
 
 .logo i {
-    color: #63b3ed; /* Softer blue for dark background */
+    color: #63b3ed;
 }
 
 .nav-links {
@@ -271,7 +271,6 @@ body.interior-page, body.home-body {
     margin-top: 1rem;
 }
 
-/* Remove styling that makes them look like floating white boxes */
 .home-content {
     max-width: 1000px;
     margin: 2rem auto 3rem;
@@ -305,10 +304,8 @@ body.interior-page, body.home-body {
     }
 }
 
-/* Validation logic (kept at bottom) */
 /* HTML/CSS Validation Logic */
 
-/* 1. Only show validation styles when the user has typed something (not placeholder shown) */
 .form-group input:not(:placeholder-shown):valid {
     border-color: #28a745;
 }
