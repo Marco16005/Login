@@ -13,6 +13,28 @@ body {
     align-items: center;
 }
 
+body.auth-page {
+    background-color: #f4f6f8;
+    min-height: 100vh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.auth-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.register-container {
+    margin: 0 auto;
+}
+
 .container {
     background: white;
     padding: 2rem;
@@ -141,6 +163,11 @@ button:active {
     font-size: 0.9rem;
 }
 
+.option-link-card {
+    text-decoration: none;
+    color: inherit;
+}
+
 /* ============================
    SHARED HEADER & FOOTER
    ============================ */
@@ -165,6 +192,8 @@ body.interior-page, body.home-body {
     width: 100%;
     position: static; /* Prevents overlap with content */
     border-bottom: 1px solid #2d3748;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .logo {
@@ -186,6 +215,7 @@ body.interior-page, body.home-body {
     gap: 2rem;
     align-items: center;
     flex-wrap: wrap;
+    margin-left: auto;
 }
 
 .nav-links a {
@@ -201,6 +231,10 @@ body.interior-page, body.home-body {
     color: #63b3ed;
 }
 
+body.auth-page .nav-links a {
+    color: #e2e8f0;
+}
+
 .logout-link {
     background-color: rgba(255, 255, 255, 0.1);
     color: #ffffff !important;
@@ -213,6 +247,27 @@ body.interior-page, body.home-body {
 .logout-link:hover {
     background-color: #e53e3e;
     border-color: #e53e3e;
+}
+
+.user-session {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    color: #cbd5e0;
+    min-width: 150px;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.session-token {
+    font-size: 0.75rem;
+    color: #90cdf4;
+    letter-spacing: 0.04em;
 }
 
 /* Footer */
@@ -290,7 +345,14 @@ body.interior-page, body.home-body {
 
     .nav-links {
         gap: 1rem;
-        justify-content: flex-end;
+        justify-content: flex-start;
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .user-session {
+        width: 100%;
+        align-items: flex-start;
     }
 
     .home-content {

@@ -7,15 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="interior-page">
-    <!-- Simple Header for Register Page -->
-    <header class="navbar" style="justify-content: center;">
-        <div class="logo">
-            <i class="fas fa-cube"></i> Portal Registration
-        </div>
-    </header>
+<body class="auth-page">
+    <header id="app-header"></header>
 
-    <div class="container" style="margin: 2rem auto;">
+    <main class="auth-main">
+    <div class="container register-container">
         <form id="register-form" class="login-form" action="index.html" novalidate>
             <h2>Create Account</h2>
             <p class="subtitle">Join our community today</p>
@@ -51,19 +47,9 @@
             </div>
         </form>
     </div>
+    </main>
 
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <i class="fas fa-cube"></i> Portal
-            </div>
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-            </div>
-            <p class="footer-copyright">&copy; 2026 My Application. All rights reserved.</p>
-        </div>
-    </footer>
+    <footer id="app-footer"></footer>
     <script src="app.js"></script>
 </body>
 </html>

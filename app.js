@@ -1,5 +1,7 @@
 const USERS_KEY = "portal_users";
 const SESSION_KEY = "portal_session";
+const INTERIOR_PAGES = ["home.html", "profile.html", "settings.html", "help.html"];
+const PUBLIC_PAGES = ["index.html", "register.html"];
 
 function getCurrentPage() {
     const path = window.location.pathname;
@@ -32,6 +34,18 @@ function setSession(sessionData) {
 
 function clearSession() {
     localStorage.removeItem(SESSION_KEY);
+}
+
+function isSessionValid(session) {
+    return Boolean(session && session.email && session.token);
+}
+
+function createSessionToken() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID().replace(/-/g, "").slice(0, 20);
+    }
+
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
 }
 
 function ensureSeedUser() {
@@ -102,28 +116,98 @@ function clearFormMessage(form) {
 }
 
 function protectInteriorPages() {
-    const protectedPages = ["home.html", "profile.html", "settings.html", "help.html"];
     const currentPage = getCurrentPage();
     const session = getSession();
 
-    if (protectedPages.includes(currentPage) && !session) {
+    if (INTERIOR_PAGES.includes(currentPage) && !isSessionValid(session)) {
         window.location.href = "index.html";
         return;
     }
 
-    if (currentPage === "index.html" && session) {
+    if (currentPage === "index.html" && isSessionValid(session)) {
         window.location.href = "home.html";
     }
 }
 
+async function fetchPartial(path) {
+    const response = await fetch(path);
+    if (!response.ok) {
+        throw new Error(`Failed to load partial: ${path}`);
+    }
+
+    return response.text();
+}
+
+function applyInteriorHeaderState(headerHost, currentPage, session) {
+    const activeLink = headerHost.querySelector(`[data-page="${currentPage}"]`);
+    if (activeLink) {
+        activeLink.classList.add("active");
+    }
+
+    const userName = headerHost.querySelector(".user-name");
+    const tokenView = headerHost.querySelector(".session-token");
+
+    if (userName) {
+        userName.textContent = session.fullname;
+    }
+
+    if (tokenView) {
+        tokenView.textContent = `Token: ${session.token.slice(0, 10).toUpperCase()}`;
+    }
+}
+
+async function renderSharedLayout() {
+    const currentPage = getCurrentPage();
+    if (!INTERIOR_PAGES.includes(currentPage) && !PUBLIC_PAGES.includes(currentPage)) {
+        return;
+    }
+
+    const headerHost = document.querySelector("#app-header");
+    const footerHost = document.querySelector("#app-footer");
+
+    try {
+        if (footerHost) {
+            footerHost.innerHTML = await fetchPartial("partials/site-footer.html");
+        }
+
+        if (!headerHost) {
+            return;
+        }
+
+        if (INTERIOR_PAGES.includes(currentPage)) {
+            const session = getSession();
+            if (!isSessionValid(session)) {
+                return;
+            }
+
+            headerHost.innerHTML = await fetchPartial("partials/interior-header.html");
+            applyInteriorHeaderState(headerHost, currentPage, session);
+            return;
+        }
+
+        if (PUBLIC_PAGES.includes(currentPage)) {
+            headerHost.innerHTML = await fetchPartial("partials/public-header.html");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 function wireLogout() {
-    const logoutLinks = document.querySelectorAll(".logout-link");
-    logoutLinks.forEach((link) => {
-        link.addEventListener("click", (event) => {
-            event.preventDefault();
-            clearSession();
-            window.location.href = "index.html";
-        });
+    document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const logoutLink = target.closest(".logout-link");
+        if (!logoutLink) {
+            return;
+        }
+
+        event.preventDefault();
+        clearSession();
+        window.location.href = "index.html";
     });
 }
 
@@ -201,6 +285,7 @@ function wireLoginForm() {
         setSession({
             fullname: match.fullname,
             email: match.email,
+            token: createSessionToken(),
             loginAt: new Date().toISOString(),
         });
 
@@ -289,9 +374,10 @@ function wireRegisterForm() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     ensureSeedUser();
     protectInteriorPages();
+    await renderSharedLayout();
     wireLogout();
     wireLoginForm();
     wireRegisterForm();
