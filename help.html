@@ -3,35 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Help Center</title>
+    <title>Pokémon Spotlight</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="interior-page">
     <header id="app-header"></header>
 
-    <main class="container home-content">
+    <main class="container home-content pokemon-page-main">
         <div class="welcome-section">
-            <h1>Help Center</h1>
-            <p>Find answers to common questions.</p>
+            <h1>Pokédex Spotlight</h1>
+            <p>Live data from PokéAPI with stats and battle information.</p>
         </div>
 
-        <div style="background: white; padding: 2rem; border-radius: 12px; margin-top: 2rem; text-align: left;">
-            <div style="margin-bottom: 2rem;">
-                <h3 style="color: #4a90e2; margin-bottom: 0.5rem;"><i class="fas fa-question-circle"></i> How do I reset my password?</h3>
-                <p style="color: #555;">Go to the settings page and click on "Change Password". Follow the instructions sent to your email.</p>
+        <section class="pokemon-card" id="pokemon-card">
+            <p class="pokemon-loading" id="pokemon-loading">Loading Pokémon data...</p>
+
+            <div id="pokemon-main" class="pokemon-main" hidden>
+                <div class="pokemon-hero">
+                    <div class="pokemon-image-wrap">
+                        <img id="pokemon-image" class="pokemon-image" src="" alt="Pokémon image" hidden>
+                    </div>
+                    <div class="pokemon-headline">
+                        <p id="pokemon-id" class="pokemon-id"></p>
+                        <h2 id="pokemon-name" class="pokemon-name"></h2>
+                        <div id="pokemon-types" class="pokemon-types"></div>
+                    </div>
+                </div>
+
+                <div class="pokemon-meta-grid">
+                    <div class="pokemon-meta-card">
+                        <h3>Abilities</h3>
+                        <ul id="pokemon-abilities" class="pokemon-abilities"></ul>
+                    </div>
+                    <div class="pokemon-meta-card">
+                        <h3>Info</h3>
+                        <p><strong>Height:</strong> <span id="pokemon-height"></span></p>
+                        <p><strong>Weight:</strong> <span id="pokemon-weight"></span></p>
+                        <p><strong>Base Experience:</strong> <span id="pokemon-base-exp"></span></p>
+                    </div>
+                </div>
+
+                <div class="pokemon-stats-card">
+                    <h3>Base Stats</h3>
+                    <div id="pokemon-stats" class="pokemon-stats"></div>
+                </div>
+
+                <div class="pokemon-cta-row">
+                    <button id="pokemon-scroll-down" class="pokemon-scroll-down" type="button">Go to selected / Load more ↓</button>
+                </div>
             </div>
 
-            <div style="margin-bottom: 2rem;">
-                <h3 style="color: #4a90e2; margin-bottom: 0.5rem;"><i class="fas fa-question-circle"></i> Can I change my email address?</h3>
-                <p style="color: #555;">Currently, email addresses cannot be changed directly. Please contact support for assistance.</p>
-            </div>
+            <p id="pokemon-error" class="pokemon-error" hidden>Could not load Pokémon data right now.</p>
+        </section>
 
-            <div>
-                <h3 style="color: #4a90e2; margin-bottom: 0.5rem;"><i class="fas fa-question-circle"></i> Who can view my profile?</h3>
-                <p style="color: #555;">Your profile is private by default and visible only to you and system administrators.</p>
+        <section class="pokemon-catalog" id="pokemon-catalog" hidden>
+            <h2 class="pokemon-catalog-title">All Pokémon (paginated)</h2>
+            <p class="pokemon-note" id="pokemon-note">Showing Pokémon in batches to keep performance fast.</p>
+
+            <div id="pokemon-list" class="pokemon-list"></div>
+
+            <div class="pokemon-actions">
+                <button id="pokemon-load-more" class="pokemon-load-more" type="button">Load more Pokémon</button>
             </div>
-        </div>
+        </section>
     </main>
 
     <footer id="app-footer"></footer>

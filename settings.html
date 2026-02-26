@@ -16,32 +16,32 @@
             <p>Manage your application preferences and security.</p>
         </div>
 
-        <div style="background: white; padding: 2rem; border-radius: 12px; margin-top: 2rem;">
+        <section class="settings-card">
             <h3>General Preferences</h3>
-            <div style="margin: 1.5rem 0; padding-bottom: 1.5rem; border-bottom: 1px solid #eee;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="settings-group">
+                <div class="settings-row settings-row-spaced">
                     <div>
                         <strong>Email Notifications</strong>
-                        <p style="font-size: 0.9rem; color: #666;">Receive updates about your account activity.</p>
+                        <p class="settings-description">Receive updates about your account activity.</p>
                     </div>
-                    <input type="checkbox" checked>
+                    <input type="checkbox" checked aria-label="Email Notifications">
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="settings-row">
                     <div>
                         <strong>Dark Mode</strong>
-                        <p style="font-size: 0.9rem; color: #666;">Switch between light and dark themes.</p>
+                        <p class="settings-description">Switch between light and dark themes.</p>
                     </div>
-                    <input type="checkbox">
+                    <input type="checkbox" aria-label="Dark Mode">
                 </div>
             </div>
 
             <h3>Security</h3>
-            <div style="margin-top: 1.5rem;">
-                <a href="#" style="color: #dc3545; text-decoration: none; font-weight: 500;">Change Password</a>
+            <div class="settings-security-links">
+                <a href="#" class="settings-danger-link">Change Password</a>
                 <br><br>
-                <a href="#" style="color: #666; text-decoration: none;">Deactivate Account</a>
+                <a href="#" class="settings-muted-link">Deactivate Account</a>
             </div>
-        </div>
+        </section>
     </main>
 
     <footer id="app-footer"></footer>

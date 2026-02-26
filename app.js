@@ -2,6 +2,7 @@ const USERS_KEY = "portal_users";
 const SESSION_KEY = "portal_session";
 const INTERIOR_PAGES = ["home.html", "profile.html", "settings.html", "help.html"];
 const PUBLIC_PAGES = ["index.html", "register.html"];
+const POKEMON_PAGE_SIZE = 30;
 
 function getCurrentPage() {
     const path = window.location.pathname;
@@ -238,6 +239,244 @@ function hydrateProfilePage() {
     if (emailInput) emailInput.value = currentUser.email;
 }
 
+function capitalize(value) {
+    if (!value) {
+        return "";
+    }
+
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+async function hydratePokemonPage() {
+    if (getCurrentPage() !== "help.html") {
+        return;
+    }
+
+    const loading = document.querySelector("#pokemon-loading");
+    const main = document.querySelector("#pokemon-main");
+    const image = document.querySelector("#pokemon-image");
+    const id = document.querySelector("#pokemon-id");
+    const name = document.querySelector("#pokemon-name");
+    const types = document.querySelector("#pokemon-types");
+    const abilities = document.querySelector("#pokemon-abilities");
+    const height = document.querySelector("#pokemon-height");
+    const weight = document.querySelector("#pokemon-weight");
+    const baseExp = document.querySelector("#pokemon-base-exp");
+    const stats = document.querySelector("#pokemon-stats");
+    const catalog = document.querySelector("#pokemon-catalog");
+    const list = document.querySelector("#pokemon-list");
+    const loadMoreButton = document.querySelector("#pokemon-load-more");
+    const scrollDownButton = document.querySelector("#pokemon-scroll-down");
+    const note = document.querySelector("#pokemon-note");
+    const error = document.querySelector("#pokemon-error");
+
+    if (!loading || !main || !image || !id || !name || !types || !abilities || !height || !weight || !baseExp || !stats || !catalog || !list || !loadMoreButton || !scrollDownButton || !note || !error) {
+        return;
+    }
+
+    let offset = 0;
+    let hasMore = true;
+    let isLoadingBatch = false;
+    let lastSelectedCard = null;
+
+    function renderPokemonDetails(data) {
+        const pokemonImage = data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default;
+        const pokemonName = capitalize(data.name);
+
+        if (pokemonImage) {
+            image.src = pokemonImage;
+            image.alt = `${pokemonName} official artwork`;
+            image.hidden = false;
+        }
+
+        id.textContent = `#${String(data.id).padStart(3, "0")}`;
+        name.textContent = pokemonName;
+
+        types.innerHTML = "";
+        data.types.forEach((entry) => {
+            const chip = document.createElement("span");
+            chip.className = "pokemon-type-chip";
+            chip.textContent = capitalize(entry.type.name);
+            types.appendChild(chip);
+        });
+
+        abilities.innerHTML = "";
+        data.abilities.forEach((entry) => {
+            const li = document.createElement("li");
+            li.textContent = capitalize(entry.ability.name.replace(/-/g, " "));
+            abilities.appendChild(li);
+        });
+
+        height.textContent = `${(data.height / 10).toFixed(1)} m`;
+        weight.textContent = `${(data.weight / 10).toFixed(1)} kg`;
+        baseExp.textContent = String(data.base_experience ?? "N/A");
+
+        stats.innerHTML = "";
+        data.stats.forEach((entry) => {
+            const statLabel = capitalize(entry.stat.name.replace(/-/g, " "));
+            const value = entry.base_stat;
+            const percentage = Math.min(100, Math.round((value / 180) * 100));
+
+            const row = document.createElement("div");
+            row.className = "pokemon-stat-row";
+
+            const statName = document.createElement("span");
+            statName.className = "pokemon-stat-name";
+            statName.textContent = statLabel;
+
+            const statTrack = document.createElement("div");
+            statTrack.className = "pokemon-stat-track";
+
+            const statFill = document.createElement("div");
+            statFill.className = "pokemon-stat-fill";
+            statFill.style.width = `${percentage}%`;
+
+            const statValue = document.createElement("span");
+            statValue.className = "pokemon-stat-value";
+            statValue.textContent = String(value);
+
+            statTrack.appendChild(statFill);
+            row.appendChild(statName);
+            row.appendChild(statTrack);
+            row.appendChild(statValue);
+            stats.appendChild(row);
+        });
+    }
+
+    function buildPokemonListCard(data, isInitiallyActive) {
+        const card = document.createElement("article");
+        card.className = `pokemon-list-card${isInitiallyActive ? " active" : ""}`;
+
+        const pokemonId = document.createElement("p");
+        pokemonId.className = "pokemon-list-id";
+        pokemonId.textContent = `#${String(data.id).padStart(3, "0")}`;
+
+        const sprite = document.createElement("img");
+        sprite.src = data.sprites?.front_default || data.sprites?.other?.["official-artwork"]?.front_default || "";
+        sprite.alt = `${capitalize(data.name)} sprite`;
+
+        const pokemonName = document.createElement("h4");
+        pokemonName.className = "pokemon-list-name";
+        pokemonName.textContent = capitalize(data.name);
+
+        const typeWrap = document.createElement("div");
+        typeWrap.className = "pokemon-list-types";
+        data.types.forEach((entry) => {
+            const chip = document.createElement("span");
+            chip.className = "pokemon-type-chip";
+            chip.textContent = capitalize(entry.type.name);
+            typeWrap.appendChild(chip);
+        });
+
+        card.appendChild(pokemonId);
+        card.appendChild(sprite);
+        card.appendChild(pokemonName);
+        card.appendChild(typeWrap);
+
+        card.addEventListener("click", () => {
+            document.querySelectorAll(".pokemon-list-card.active").forEach((activeCard) => {
+                activeCard.classList.remove("active");
+            });
+            card.classList.add("active");
+            lastSelectedCard = card;
+            renderPokemonDetails(data);
+            main.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        return card;
+    }
+
+    async function fetchPokemonBatch(currentOffset) {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${POKEMON_PAGE_SIZE}&offset=${currentOffset}`);
+        if (!response.ok) {
+            throw new Error("Could not fetch pokemon list");
+        }
+
+        const listData = await response.json();
+        const details = await Promise.all(
+            listData.results.map(async (pokemon) => {
+                const detailResponse = await fetch(pokemon.url);
+                if (!detailResponse.ok) {
+                    throw new Error("Could not fetch pokemon details");
+                }
+                return detailResponse.json();
+            })
+        );
+
+        return {
+            details,
+            hasMore: Boolean(listData.next),
+        };
+    }
+
+    async function loadNextBatch() {
+        if (!hasMore || isLoadingBatch) {
+            return;
+        }
+
+        isLoadingBatch = true;
+        loadMoreButton.disabled = true;
+        loadMoreButton.textContent = "Loading...";
+
+        try {
+            const { details, hasMore: more } = await fetchPokemonBatch(offset);
+
+            if (offset === 0 && details.length > 0) {
+                renderPokemonDetails(details[0]);
+            }
+
+            details.forEach((pokemon, index) => {
+                const card = buildPokemonListCard(pokemon, offset === 0 && index === 0);
+                if (offset === 0 && index === 0) {
+                    lastSelectedCard = card;
+                }
+                list.appendChild(card);
+            });
+
+            offset += POKEMON_PAGE_SIZE;
+            hasMore = more;
+
+            if (!hasMore) {
+                loadMoreButton.disabled = true;
+                loadMoreButton.textContent = "All Pokémon loaded";
+                note.textContent = "You reached the end of the Pokédex list.";
+            } else {
+                loadMoreButton.disabled = false;
+                loadMoreButton.textContent = "Load more Pokémon";
+            }
+
+            loading.hidden = true;
+            main.hidden = false;
+            catalog.hidden = false;
+            error.hidden = true;
+        } catch {
+            loading.hidden = true;
+            main.hidden = true;
+            catalog.hidden = true;
+            error.hidden = false;
+            loadMoreButton.disabled = false;
+            loadMoreButton.textContent = "Load more Pokémon";
+        } finally {
+            isLoadingBatch = false;
+        }
+    }
+
+    try {
+        scrollDownButton.addEventListener("click", () => {
+            const target = lastSelectedCard || loadMoreButton;
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+
+        loadMoreButton.addEventListener("click", loadNextBatch);
+        await loadNextBatch();
+    } catch {
+        loading.hidden = true;
+        main.hidden = true;
+        catalog.hidden = true;
+        error.hidden = false;
+    }
+}
+
 function wireLoginForm() {
     const form = document.querySelector("#login-form");
     if (!form) {
@@ -382,4 +621,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     wireLoginForm();
     wireRegisterForm();
     hydrateProfilePage();
+    await hydratePokemonPage();
 });
