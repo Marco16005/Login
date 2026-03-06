@@ -4,11 +4,13 @@ const INTERIOR_PAGES = ["home.html", "profile.html", "settings.html", "help.html
 const PUBLIC_PAGES = ["index.html", "register.html"];
 const POKEMON_PAGE_SIZE = 30;
 
+// Resolve current file name from URL path (defaults to login page).
 function getCurrentPage() {
     const path = window.location.pathname;
     return path.substring(path.lastIndexOf("/") + 1) || "index.html";
 }
 
+// Read registered users from localStorage.
 function getUsers() {
     try {
         return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
@@ -17,10 +19,12 @@ function getUsers() {
     }
 }
 
+// Persist users array in localStorage.
 function setUsers(users) {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
+// Read active session object from localStorage.
 function getSession() {
     try {
         return JSON.parse(localStorage.getItem(SESSION_KEY));
@@ -29,18 +33,22 @@ function getSession() {
     }
 }
 
+// Persist active session data.
 function setSession(sessionData) {
     localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
 }
 
+// Clear session when user logs out.
 function clearSession() {
     localStorage.removeItem(SESSION_KEY);
 }
 
+// Minimal session shape check for route protection.
 function isSessionValid(session) {
     return Boolean(session && session.email && session.token);
 }
 
+// Generate a short session token (crypto first, fallback otherwise).
 function createSessionToken() {
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
         return window.crypto.randomUUID().replace(/-/g, "").slice(0, 20);
@@ -49,6 +57,7 @@ function createSessionToken() {
     return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
 }
 
+// Ensure a demo/admin account exists for quick testing.
 function ensureSeedUser() {
     const users = getUsers();
     const hasDefault = users.some((user) => user.email.toLowerCase() === "admin@example.com");
@@ -64,10 +73,12 @@ function ensureSeedUser() {
     }
 }
 
+// Simple client-side email format validation.
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Reuse existing inline error node or create one after input.
 function getErrorNode(inputElement) {
     const next = inputElement.nextElementSibling;
     if (next && next.classList.contains("error-text")) {
@@ -80,6 +91,7 @@ function getErrorNode(inputElement) {
     return error;
 }
 
+// Show validation error for one field.
 function setFieldError(inputElement, message) {
     const errorNode = getErrorNode(inputElement);
     errorNode.textContent = message;
@@ -87,6 +99,7 @@ function setFieldError(inputElement, message) {
     inputElement.style.borderColor = "#dc3545";
 }
 
+// Clear validation error for one field.
 function clearFieldError(inputElement) {
     const errorNode = getErrorNode(inputElement);
     errorNode.textContent = "";
@@ -94,6 +107,7 @@ function clearFieldError(inputElement) {
     inputElement.style.borderColor = "#e1e1e1";
 }
 
+// Show form-level message (error/success).
 function setFormMessage(form, message, isError = true) {
     let messageNode = form.querySelector(".form-message");
     if (!messageNode) {
@@ -109,6 +123,7 @@ function setFormMessage(form, message, isError = true) {
     messageNode.style.color = isError ? "#dc3545" : "#28a745";
 }
 
+// Clear form-level message if present.
 function clearFormMessage(form) {
     const messageNode = form.querySelector(".form-message");
     if (messageNode) {
@@ -116,6 +131,7 @@ function clearFormMessage(form) {
     }
 }
 
+// Guard interior routes and redirect already-authenticated users away from login.
 function protectInteriorPages() {
     const currentPage = getCurrentPage();
     const session = getSession();
@@ -130,6 +146,7 @@ function protectInteriorPages() {
     }
 }
 
+// Load reusable header/footer partials as plain HTML text.
 async function fetchPartial(path) {
     const response = await fetch(path);
     if (!response.ok) {
@@ -139,6 +156,7 @@ async function fetchPartial(path) {
     return response.text();
 }
 
+// Mark active nav link and inject user/session preview in interior header.
 function applyInteriorHeaderState(headerHost, currentPage, session) {
     const activeLink = headerHost.querySelector(`[data-page="${currentPage}"]`);
     if (activeLink) {
@@ -157,6 +175,7 @@ function applyInteriorHeaderState(headerHost, currentPage, session) {
     }
 }
 
+// Render shared header/footer based on current page type.
 async function renderSharedLayout() {
     const currentPage = getCurrentPage();
     if (!INTERIOR_PAGES.includes(currentPage) && !PUBLIC_PAGES.includes(currentPage)) {
@@ -194,6 +213,7 @@ async function renderSharedLayout() {
     }
 }
 
+// Global delegated logout handler (works with dynamically injected header).
 function wireLogout() {
     document.addEventListener("click", (event) => {
         const target = event.target;
@@ -212,6 +232,7 @@ function wireLogout() {
     });
 }
 
+// Fill profile page fields from the current session user.
 function hydrateProfilePage() {
     if (getCurrentPage() !== "profile.html") {
         return;
@@ -239,6 +260,7 @@ function hydrateProfilePage() {
     if (emailInput) emailInput.value = currentUser.email;
 }
 
+// Utility to display API labels with leading uppercase.
 function capitalize(value) {
     if (!value) {
         return "";
@@ -247,6 +269,7 @@ function capitalize(value) {
     return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+// Main Pokedex hydration flow: fetch, render, filter and background loading.
 async function hydratePokemonPage() {
     if (getCurrentPage() !== "help.html") {
         return;
@@ -277,6 +300,7 @@ async function hydratePokemonPage() {
         return;
     }
 
+    // Runtime state for progressive loading and UI sync.
     let offset = 0;
     let hasMore = true;
     let totalCount = 0;
@@ -285,6 +309,7 @@ async function hydratePokemonPage() {
     const allPokemon = [];
     const knownTypes = new Set();
 
+    // Paint the top detail panel for the selected pokemon.
     function renderPokemonDetails(data) {
         const pokemonImage = data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default;
         const pokemonName = capitalize(data.name);
@@ -313,6 +338,7 @@ async function hydratePokemonPage() {
             abilities.appendChild(li);
         });
 
+        // Height/weight from API come in decimeters/hectograms.
         height.textContent = `${(data.height / 10).toFixed(1)} m`;
         weight.textContent = `${(data.weight / 10).toFixed(1)} kg`;
         baseExp.textContent = String(data.base_experience ?? "N/A");
@@ -321,6 +347,7 @@ async function hydratePokemonPage() {
         data.stats.forEach((entry) => {
             const statLabel = capitalize(entry.stat.name.replace(/-/g, " "));
             const value = entry.base_stat;
+            // Normalize stat bars to a visual 0-100 track.
             const percentage = Math.min(100, Math.round((value / 180) * 100));
 
             const row = document.createElement("div");
@@ -349,6 +376,7 @@ async function hydratePokemonPage() {
         });
     }
 
+    // Rebuild type filter options from loaded data while preserving selection.
     function updateTypeOptions() {
         const selected = filterType.value;
         const typeList = Array.from(knownTypes).sort();
@@ -364,6 +392,7 @@ async function hydratePokemonPage() {
         filterType.value = selected;
     }
 
+    // Create one catalog card and wire selection behavior.
     function buildPokemonListCard(data, isInitiallyActive) {
         const card = document.createElement("article");
         card.className = `pokemon-list-card${isInitiallyActive ? " active" : ""}`;
@@ -414,6 +443,7 @@ async function hydratePokemonPage() {
         return card;
     }
 
+    // Locate selected card in the currently rendered/filtered list.
     function findSelectedCard() {
         if (!selectedPokemonId) {
             return null;
@@ -422,6 +452,7 @@ async function hydratePokemonPage() {
         return list.querySelector(`[data-pokemon-id="${selectedPokemonId}"]`);
     }
 
+    // Adapt jump button label based on current list/selection state.
     function updateJumpButtonState() {
         const selectedCard = findSelectedCard();
 
@@ -438,6 +469,7 @@ async function hydratePokemonPage() {
         jumpButton.textContent = "Catalog loading...";
     }
 
+    // Apply id/name/type filters over loaded pokemon and rerender list.
     function applyFilters() {
         const idFilter = filterId.value.trim();
         const nameFilter = filterName.value.trim().toLowerCase();
@@ -466,6 +498,7 @@ async function hydratePokemonPage() {
 
         const selectedStillVisible = filtered.some((pokemon) => pokemon.id === selectedPokemonId);
         if (!selectedStillVisible) {
+            // Keep detail panel consistent if current selection is filtered out.
             selectedPokemonId = filtered[0].id;
             renderPokemonDetails(filtered[0]);
             list.firstElementChild?.classList.add("active");
@@ -476,6 +509,7 @@ async function hydratePokemonPage() {
         updateJumpButtonState();
     }
 
+    // Fetch one page from list endpoint and resolve details for each pokemon.
     async function fetchPokemonBatch(currentOffset) {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${POKEMON_PAGE_SIZE}&offset=${currentOffset}`);
         if (!response.ok) {
@@ -500,6 +534,7 @@ async function hydratePokemonPage() {
         };
     }
 
+    // Merge one fetched batch into app state and refresh dependent UI.
     function appendBatch(details) {
         details.forEach((pokemon) => {
             allPokemon.push(pokemon);
@@ -515,6 +550,7 @@ async function hydratePokemonPage() {
         applyFilters();
     }
 
+    // Swap loading skeleton for the actual pokemon UI.
     function showPokemonSections() {
         loading.hidden = true;
         main.hidden = false;
@@ -522,6 +558,7 @@ async function hydratePokemonPage() {
         error.hidden = true;
     }
 
+    // Continue loading remaining pages in background after first render.
     async function loadRemainingBatchesInBackground() {
         if (isLoadingAll) {
             return;
@@ -552,6 +589,7 @@ async function hydratePokemonPage() {
                 return;
             }
 
+            // If partial data exists, keep UI usable and show non-blocking status.
             note.textContent = `Loaded ${allPokemon.length}${totalCount ? ` / ${totalCount}` : ""}. Background loading paused due to a network error.`;
         } finally {
             isLoadingAll = false;
@@ -559,6 +597,7 @@ async function hydratePokemonPage() {
     }
 
     try {
+        // Filters react immediately to user input.
         filterId.addEventListener("input", applyFilters);
         filterName.addEventListener("input", applyFilters);
         filterType.addEventListener("change", applyFilters);
@@ -570,6 +609,7 @@ async function hydratePokemonPage() {
             applyFilters();
         });
 
+        // Jump action: return to selected card or go down to catalog.
         jumpButton.addEventListener("click", () => {
             const selectedCard = findSelectedCard();
             if (selectedCard) {
@@ -580,6 +620,7 @@ async function hydratePokemonPage() {
             catalog.scrollIntoView({ behavior: "smooth", block: "start" });
         });
 
+        // Fast first paint: render first 30 items, then load the rest asynchronously.
         const firstBatch = await fetchPokemonBatch(offset);
         totalCount = firstBatch.totalCount;
         offset += POKEMON_PAGE_SIZE;
@@ -591,6 +632,7 @@ async function hydratePokemonPage() {
         if (hasMore) {
             note.textContent = `Loaded ${allPokemon.length}${totalCount ? ` / ${totalCount}` : ""}. Loading remaining Pokémon in background...`;
             updateJumpButtonState();
+            // Fire-and-forget background load to keep UI responsive.
             void loadRemainingBatchesInBackground();
         }
     } catch {
@@ -601,6 +643,7 @@ async function hydratePokemonPage() {
     }
 }
 
+// Attach login behavior if login form is present.
 function wireLoginForm() {
     const form = document.querySelector("#login-form");
     if (!form) {
@@ -637,6 +680,7 @@ function wireLoginForm() {
             return;
         }
 
+        // Authenticate against local users list.
         const users = getUsers();
         const match = users.find((user) => user.email.toLowerCase() === email && user.password === password);
 
@@ -656,6 +700,7 @@ function wireLoginForm() {
     });
 }
 
+// Attach register behavior if register form is present.
 function wireRegisterForm() {
     const form = document.querySelector("#register-form");
     if (!form) {
@@ -711,6 +756,7 @@ function wireRegisterForm() {
         }
 
         const users = getUsers();
+        // Prevent duplicate accounts by email.
         const userExists = users.some((user) => user.email.toLowerCase() === email);
 
         if (userExists) {
@@ -737,6 +783,7 @@ function wireRegisterForm() {
     });
 }
 
+// Boot sequence for every page.
 document.addEventListener("DOMContentLoaded", async () => {
     ensureSeedUser();
     protectInteriorPages();
