@@ -614,6 +614,43 @@ body.auth-page .nav-links a {
     margin-bottom: 0.4rem;
 }
 
+.pokemon-filters {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
+    align-items: end;
+}
+
+.pokemon-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.pokemon-filter-item label {
+    font-size: 0.82rem;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+.pokemon-filter-item input,
+.pokemon-filter-item select {
+    border: 1px solid #d4dce8;
+    background: #fff;
+    color: #1a202c;
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.pokemon-filter-item input:focus,
+.pokemon-filter-item select:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.12);
+}
+
 .pokemon-list {
     margin-top: 1.25rem;
     display: grid;
@@ -674,39 +711,32 @@ body.auth-page .nav-links a {
     padding: 0.2rem 0.55rem;
 }
 
-.pokemon-actions {
-    margin-top: 1.2rem;
-    display: flex;
-    justify-content: center;
-}
-
 .pokemon-load-more {
-    width: auto;
+    width: 100%;
     padding: 0.7rem 1.2rem;
     border-radius: 10px;
 }
 
-.pokemon-cta-row {
-    margin-top: 0.5rem;
+.pokemon-actions {
     display: flex;
     justify-content: center;
+    margin-top: 0.25rem;
 }
 
-.pokemon-scroll-down {
-    width: auto;
-    padding: 0.65rem 1.1rem;
+.pokemon-jump-btn {
+    border: none;
+    background: linear-gradient(90deg, #4a90e2 0%, #357abd 100%);
+    color: #ffffff;
+    font-weight: 600;
     border-radius: 10px;
-    background: #2d3748;
-    font-size: 0.9rem;
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.pokemon-scroll-down:hover {
-    background: #1a202c;
-}
-
-.pokemon-load-more:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.pokemon-jump-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 14px rgba(53, 122, 189, 0.24);
 }
 
 @media (max-width: 768px) {
@@ -745,6 +775,10 @@ body.auth-page .nav-links a {
     }
 
     .pokemon-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pokemon-filters {
         grid-template-columns: 1fr;
     }
 

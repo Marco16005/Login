@@ -49,12 +49,38 @@
                     <div id="pokemon-stats" class="pokemon-stats"></div>
                 </div>
 
+                <div class="pokemon-actions">
+                    <button id="pokemon-jump-btn" class="pokemon-jump-btn" type="button">Go to selected card</button>
+                </div>
             </div>
 
             <p id="pokemon-error" class="pokemon-error" hidden>Could not load Pokémon data right now.</p>
         </section>
 
-        <p class="pokemon-note">Current spotlight Pokémon: Pikachu</p>
+        <section class="pokemon-catalog" id="pokemon-catalog" hidden>
+            <h2 class="pokemon-catalog-title">All Pokémon</h2>
+            <p class="pokemon-note" id="pokemon-note">Loading all Pokémon progressively in batches...</p>
+
+            <div class="pokemon-filters">
+                <div class="pokemon-filter-item">
+                    <label for="filter-id">Filter by ID</label>
+                    <input id="filter-id" type="number" min="1" placeholder="e.g. 25">
+                </div>
+                <div class="pokemon-filter-item">
+                    <label for="filter-name">Filter by Name</label>
+                    <input id="filter-name" type="text" placeholder="e.g. pikachu">
+                </div>
+                <div class="pokemon-filter-item">
+                    <label for="filter-type">Filter by Type</label>
+                    <select id="filter-type">
+                        <option value="">All types</option>
+                    </select>
+                </div>
+                <button id="filter-clear" class="pokemon-load-more" type="button">Clear filters</button>
+            </div>
+
+            <div id="pokemon-list" class="pokemon-list"></div>
+        </section>
     </main>
 
     <footer id="app-footer"></footer>
