@@ -57,6 +57,54 @@
             <p id="pokemon-error" class="pokemon-error" hidden>Could not load Pokémon data right now.</p>
         </section>
 
+        <section class="pokemon-battle" id="pokemon-battle">
+            <h2 class="pokemon-catalog-title">Pokémon Battle Simulator</h2>
+            <p class="pokemon-note">Pick 2 Pokémon by id or name and watch the fight turn by turn.</p>
+
+            <div class="battle-setup-grid">
+                <div class="pokemon-filter-item">
+                    <label for="battle-fighter-1-input">Fighter 1 (id or name)</label>
+                    <input id="battle-fighter-1-input" type="text" placeholder="e.g. 25 or pikachu">
+                </div>
+                <div class="pokemon-filter-item">
+                    <label for="battle-fighter-2-input">Fighter 2 (id or name)</label>
+                    <input id="battle-fighter-2-input" type="text" placeholder="e.g. 6 or charizard">
+                </div>
+                <button id="battle-load-fighters" class="pokemon-jump-btn" type="button">Load fighters</button>
+                <button id="battle-start" class="pokemon-jump-btn" type="button">Start battle</button>
+            </div>
+
+            <div id="battle-status" class="battle-status">Load both fighters to begin.</div>
+
+            <div class="battle-fighters-grid">
+                <article class="battle-fighter-card" id="battle-fighter-1-card">
+                    <img id="battle-fighter-1-image" src="" alt="Fighter 1" hidden>
+                    <h3 id="battle-fighter-1-name">Fighter 1</h3>
+                    <p id="battle-fighter-1-hp">HP: 100%</p>
+                </article>
+                <article class="battle-fighter-card" id="battle-fighter-2-card">
+                    <img id="battle-fighter-2-image" src="" alt="Fighter 2" hidden>
+                    <h3 id="battle-fighter-2-name">Fighter 2</h3>
+                    <p id="battle-fighter-2-hp">HP: 100%</p>
+                </article>
+            </div>
+
+            <div class="battle-rules">
+                <p><strong>Rules:</strong> Special attack needs 3 turns, special defense needs 2 turns, and actions can fail randomly.</p>
+            </div>
+
+            <div class="battle-log-wrap">
+                <h3>Battle log</h3>
+                <ul id="battle-log" class="battle-log"></ul>
+            </div>
+
+            <div id="battle-winner" class="battle-winner" hidden>
+                <p class="battle-winner-title">Winner</p>
+                <img id="battle-winner-image" src="" alt="Winner Pokemon">
+                <h3 id="battle-winner-name"></h3>
+            </div>
+        </section>
+
         <section class="pokemon-catalog" id="pokemon-catalog" hidden>
             <h2 class="pokemon-catalog-title">All Pokémon</h2>
             <p class="pokemon-note" id="pokemon-note">Loading all Pokémon progressively in batches...</p>

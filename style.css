@@ -739,6 +739,127 @@ body.auth-page .nav-links a {
     box-shadow: 0 7px 14px rgba(53, 122, 189, 0.24);
 }
 
+.pokemon-battle {
+    margin-top: 2rem;
+    background: #ffffff;
+    border: 1px solid #e8edf6;
+    border-radius: 12px;
+    padding: 1.4rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.battle-setup-grid {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.battle-status {
+    margin-top: 1rem;
+    background: #edf4ff;
+    border: 1px solid #d8e6ff;
+    color: #2c5282;
+    border-radius: 10px;
+    padding: 0.65rem 0.8rem;
+    font-weight: 600;
+}
+
+.battle-fighters-grid {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.battle-fighter-card {
+    border: 1px solid #e5ebf6;
+    border-radius: 12px;
+    padding: 0.9rem;
+    text-align: center;
+    background: linear-gradient(180deg, #fbfdff 0%, #f2f7ff 100%);
+}
+
+.battle-fighter-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+}
+
+.battle-fighter-card h3 {
+    margin-top: 0.45rem;
+    color: #1a202c;
+    text-transform: capitalize;
+}
+
+.battle-fighter-card p {
+    margin-top: 0.25rem;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.battle-rules {
+    margin-top: 0.9rem;
+    color: #4a5568;
+    font-size: 0.92rem;
+}
+
+.battle-log-wrap {
+    margin-top: 1rem;
+}
+
+.battle-log-wrap h3 {
+    color: #1a202c;
+    margin-bottom: 0.55rem;
+}
+
+.battle-log {
+    margin: 0;
+    padding: 0.8rem;
+    border: 1px solid #e5ebf6;
+    border-radius: 12px;
+    list-style: none;
+    max-height: 320px;
+    overflow: auto;
+    background: #fafcff;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.battle-log li {
+    color: #2d3748;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.battle-winner {
+    margin-top: 1rem;
+    border: 2px solid #4a90e2;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f5faff 0%, #e7f1ff 100%);
+    padding: 1rem;
+    text-align: center;
+}
+
+.battle-winner-title {
+    color: #2c5282;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.battle-winner img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+}
+
+.battle-winner h3 {
+    color: #1a202c;
+    text-transform: capitalize;
+}
+
 @media (max-width: 768px) {
     .navbar {
         padding: 1rem;
@@ -779,6 +900,14 @@ body.auth-page .nav-links a {
     }
 
     .pokemon-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .battle-setup-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .battle-fighters-grid {
         grid-template-columns: 1fr;
     }
 

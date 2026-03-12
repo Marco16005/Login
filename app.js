@@ -2,17 +2,20 @@ const USERS_KEY = "portal_users";
 const SESSION_KEY = "portal_session";
 const INTERIOR_PAGES = ["home.html", "profile.html", "settings.html", "help.html"];
 const PUBLIC_PAGES = ["index.html", "register.html"];
+// Number of pokemon fetched per API page for first paint + background loading.
 const POKEMON_PAGE_SIZE = 30;
 
 // Resolve current file name from URL path (defaults to login page).
 function getCurrentPage() {
     const path = window.location.pathname;
+    // Example: "/foo/help.html" -> "help.html".
     return path.substring(path.lastIndexOf("/") + 1) || "index.html";
 }
 
 // Read registered users from localStorage.
 function getUsers() {
     try {
+        // Return [] if key does not exist yet.
         return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
     } catch {
         return [];
@@ -27,6 +30,7 @@ function setUsers(users) {
 // Read active session object from localStorage.
 function getSession() {
     try {
+        // Session shape: { fullname, email, token, loginAt }.
         return JSON.parse(localStorage.getItem(SESSION_KEY));
     } catch {
         return null;
@@ -35,11 +39,13 @@ function getSession() {
 
 // Persist active session data.
 function setSession(sessionData) {
+    // Keep writes centralized in case session schema changes later.
     localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
 }
 
 // Clear session when user logs out.
 function clearSession() {
+    // Remove only session key; keep users list untouched.
     localStorage.removeItem(SESSION_KEY);
 }
 
@@ -51,9 +57,11 @@ function isSessionValid(session) {
 // Generate a short session token (crypto first, fallback otherwise).
 function createSessionToken() {
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        // Trim UUID to a shorter UI-friendly token preview.
         return window.crypto.randomUUID().replace(/-/g, "").slice(0, 20);
     }
 
+    // Fallback for older browsers without crypto.randomUUID.
     return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
 }
 
@@ -63,6 +71,7 @@ function ensureSeedUser() {
     const hasDefault = users.some((user) => user.email.toLowerCase() === "admin@example.com");
 
     if (!hasDefault) {
+        // One default account simplifies first-time demo/QA.
         users.push({
             fullname: "Admin User",
             email: "admin@example.com",
@@ -87,6 +96,7 @@ function getErrorNode(inputElement) {
 
     const error = document.createElement("span");
     error.className = "error-text";
+    // Place message right after field for easy visual association.
     inputElement.insertAdjacentElement("afterend", error);
     return error;
 }
@@ -113,6 +123,7 @@ function setFormMessage(form, message, isError = true) {
     if (!messageNode) {
         messageNode = document.createElement("p");
         messageNode.className = "form-message";
+        // Keep message inside the same form to avoid global banners.
         form.appendChild(messageNode);
     }
 
@@ -137,17 +148,20 @@ function protectInteriorPages() {
     const session = getSession();
 
     if (INTERIOR_PAGES.includes(currentPage) && !isSessionValid(session)) {
+        // Hard redirect keeps interior content inaccessible without session.
         window.location.href = "index.html";
         return;
     }
 
     if (currentPage === "index.html" && isSessionValid(session)) {
+        // Skip login screen when user is already authenticated.
         window.location.href = "home.html";
     }
 }
 
 // Load reusable header/footer partials as plain HTML text.
 async function fetchPartial(path) {
+    // Native fetch is enough because partials are static local files.
     const response = await fetch(path);
     if (!response.ok) {
         throw new Error(`Failed to load partial: ${path}`);
@@ -171,6 +185,7 @@ function applyInteriorHeaderState(headerHost, currentPage, session) {
     }
 
     if (tokenView) {
+        // Show only a short preview token in UI.
         tokenView.textContent = `Token: ${session.token.slice(0, 10).toUpperCase()}`;
     }
 }
@@ -187,6 +202,7 @@ async function renderSharedLayout() {
 
     try {
         if (footerHost) {
+            // Footer is shared by both public and interior pages.
             footerHost.innerHTML = await fetchPartial("partials/site-footer.html");
         }
 
@@ -197,6 +213,7 @@ async function renderSharedLayout() {
         if (INTERIOR_PAGES.includes(currentPage)) {
             const session = getSession();
             if (!isSessionValid(session)) {
+                // Do not render interior header state if session is invalid.
                 return;
             }
 
@@ -244,6 +261,7 @@ function hydrateProfilePage() {
     }
 
     const users = getUsers();
+    // Email is used as unique user key in this demo app.
     const currentUser = users.find((user) => user.email.toLowerCase() === session.email.toLowerCase());
     if (!currentUser) {
         return;
@@ -297,6 +315,7 @@ async function hydratePokemonPage() {
     const error = document.querySelector("#pokemon-error");
 
     if (!loading || !main || !image || !id || !name || !types || !abilities || !height || !weight || !baseExp || !stats || !catalog || !list || !filterId || !filterName || !filterType || !filterClear || !jumpButton || !note || !error) {
+        // Exit silently if page structure changed or ids are missing.
         return;
     }
 
@@ -306,11 +325,13 @@ async function hydratePokemonPage() {
     let totalCount = 0;
     let isLoadingAll = false;
     let selectedPokemonId = null;
+    // Local cache to avoid refetching for filters.
     const allPokemon = [];
     const knownTypes = new Set();
 
     // Paint the top detail panel for the selected pokemon.
     function renderPokemonDetails(data) {
+        // Prefer high-quality official artwork, then fallback sprite.
         const pokemonImage = data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default;
         const pokemonName = capitalize(data.name);
 
@@ -324,6 +345,7 @@ async function hydratePokemonPage() {
         name.textContent = pokemonName;
 
         types.innerHTML = "";
+        // Types are rendered as chips for quick visual scan.
         data.types.forEach((entry) => {
             const chip = document.createElement("span");
             chip.className = "pokemon-type-chip";
@@ -344,6 +366,7 @@ async function hydratePokemonPage() {
         baseExp.textContent = String(data.base_experience ?? "N/A");
 
         stats.innerHTML = "";
+        // Convert each stat to a row with value + bar width.
         data.stats.forEach((entry) => {
             const statLabel = capitalize(entry.stat.name.replace(/-/g, " "));
             const value = entry.base_stat;
@@ -379,6 +402,7 @@ async function hydratePokemonPage() {
     // Rebuild type filter options from loaded data while preserving selection.
     function updateTypeOptions() {
         const selected = filterType.value;
+        // Set -> Array lets us sort alphabetically for stable UX.
         const typeList = Array.from(knownTypes).sort();
         filterType.innerHTML = '<option value="">All types</option>';
 
@@ -430,6 +454,7 @@ async function hydratePokemonPage() {
         card.appendChild(typeWrap);
 
         card.addEventListener("click", () => {
+            // Keep only one active card at a time.
             document.querySelectorAll(".pokemon-list-card.active").forEach((activeCard) => {
                 activeCard.classList.remove("active");
             });
@@ -449,6 +474,7 @@ async function hydratePokemonPage() {
             return null;
         }
 
+        // Data attribute gives O(n) DOM lookup without extra map structure.
         return list.querySelector(`[data-pokemon-id="${selectedPokemonId}"]`);
     }
 
@@ -476,6 +502,7 @@ async function hydratePokemonPage() {
         const typeFilter = filterType.value;
 
         const filtered = allPokemon.filter((pokemon) => {
+            // ID exact match, name contains, type any-match.
             const matchesId = !idFilter || String(pokemon.id) === idFilter;
             const matchesName = !nameFilter || pokemon.name.includes(nameFilter);
             const matchesType = !typeFilter || pokemon.types.some((entry) => entry.type.name === typeFilter);
@@ -483,6 +510,7 @@ async function hydratePokemonPage() {
         });
 
         list.innerHTML = "";
+        // Re-render list from filtered state for deterministic UI.
 
         filtered.forEach((pokemon) => {
             const isActive = selectedPokemonId === pokemon.id;
@@ -511,12 +539,14 @@ async function hydratePokemonPage() {
 
     // Fetch one page from list endpoint and resolve details for each pokemon.
     async function fetchPokemonBatch(currentOffset) {
+        // First call returns names + detail URLs + count + next.
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${POKEMON_PAGE_SIZE}&offset=${currentOffset}`);
         if (!response.ok) {
             throw new Error("Could not fetch pokemon list");
         }
 
         const listData = await response.json();
+        // Resolve details in parallel for this batch.
         const details = await Promise.all(
             listData.results.map(async (pokemon) => {
                 const detailResponse = await fetch(pokemon.url);
@@ -538,6 +568,7 @@ async function hydratePokemonPage() {
     function appendBatch(details) {
         details.forEach((pokemon) => {
             allPokemon.push(pokemon);
+            // Track all unique types discovered so far.
             pokemon.types.forEach((entry) => knownTypes.add(entry.type.name));
         });
 
@@ -561,6 +592,7 @@ async function hydratePokemonPage() {
     // Continue loading remaining pages in background after first render.
     async function loadRemainingBatchesInBackground() {
         if (isLoadingAll) {
+            // Prevent accidental double-start of background loader.
             return;
         }
 
@@ -568,6 +600,7 @@ async function hydratePokemonPage() {
 
         try {
             while (hasMore) {
+                // Pull next chunk and merge it into local cache.
                 const batch = await fetchPokemonBatch(offset);
                 totalCount = batch.totalCount;
                 offset += POKEMON_PAGE_SIZE;
@@ -603,6 +636,7 @@ async function hydratePokemonPage() {
         filterType.addEventListener("change", applyFilters);
 
         filterClear.addEventListener("click", () => {
+            // Reset all filter inputs to neutral state.
             filterId.value = "";
             filterName.value = "";
             filterType.value = "";
@@ -636,11 +670,305 @@ async function hydratePokemonPage() {
             void loadRemainingBatchesInBackground();
         }
     } catch {
+        // Initial load failed: hide sections and show compact error text.
         loading.hidden = true;
         main.hidden = true;
         catalog.hidden = true;
         error.hidden = false;
     }
+}
+
+// Simulate a turn-based Pokemon battle from API data and render step-by-step logs.
+async function hydratePokemonBattleGame() {
+    if (getCurrentPage() !== "help.html") {
+        return;
+    }
+
+    const fighterOneInput = document.querySelector("#battle-fighter-1-input");
+    const fighterTwoInput = document.querySelector("#battle-fighter-2-input");
+    const loadButton = document.querySelector("#battle-load-fighters");
+    const startButton = document.querySelector("#battle-start");
+    const status = document.querySelector("#battle-status");
+    const log = document.querySelector("#battle-log");
+    const winnerWrap = document.querySelector("#battle-winner");
+    const winnerImage = document.querySelector("#battle-winner-image");
+    const winnerName = document.querySelector("#battle-winner-name");
+
+    const fighterOneImage = document.querySelector("#battle-fighter-1-image");
+    const fighterOneName = document.querySelector("#battle-fighter-1-name");
+    const fighterOneHp = document.querySelector("#battle-fighter-1-hp");
+
+    const fighterTwoImage = document.querySelector("#battle-fighter-2-image");
+    const fighterTwoName = document.querySelector("#battle-fighter-2-name");
+    const fighterTwoHp = document.querySelector("#battle-fighter-2-hp");
+
+    if (!fighterOneInput || !fighterTwoInput || !loadButton || !startButton || !status || !log || !winnerWrap || !winnerImage || !winnerName || !fighterOneImage || !fighterOneName || !fighterOneHp || !fighterTwoImage || !fighterTwoName || !fighterTwoHp) {
+        // Skip battle module if this page does not include the battle section.
+        return;
+    }
+
+    let fighters = [null, null];
+    let isBattleRunning = false;
+
+    // Defense hint: encapsulate DOM logging so battle loop stays easy to read.
+    function addBattleLog(text) {
+        const item = document.createElement("li");
+        item.textContent = text;
+        log.appendChild(item);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function randomInt(min, max) {
+        // Inclusive random helper used for damage rolls.
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function sleep(ms) {
+        // Small delay between turns improves readability of battle log.
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    // Fetch one pokemon by id or name for the battle setup.
+    async function fetchBattlePokemon(query) {
+        const normalized = query.trim().toLowerCase();
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(normalized)}`);
+        if (!response.ok) {
+            throw new Error(`Pokemon not found: ${query}`);
+        }
+        return response.json();
+    }
+
+    // Map API payload to a compact fighter state used by the simulator.
+    function toBattleFighter(data) {
+        const artwork = data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || "";
+        const attackStat = data.stats.find((entry) => entry.stat.name === "attack")?.base_stat ?? 60;
+        const specialAttackStat = data.stats.find((entry) => entry.stat.name === "special-attack")?.base_stat ?? 60;
+
+        return {
+            id: data.id,
+            name: capitalize(data.name),
+            image: artwork,
+            // HP is normalized to 100% to keep battle output simple/comparable.
+            hp: 100,
+            attackStat,
+            specialAttackStat,
+            // Shield applies only to the next incoming hit.
+            hasShield: false,
+            // Track own turns to enforce cooldown rules.
+            turnsTaken: 0,
+            lastSpecialAttackTurn: -999,
+            lastSpecialDefenseTurn: -999,
+        };
+    }
+
+    function renderFighterPanel(index) {
+        const fighter = fighters[index];
+        if (!fighter) {
+            return;
+        }
+
+        const imageNode = index === 0 ? fighterOneImage : fighterTwoImage;
+        const nameNode = index === 0 ? fighterOneName : fighterTwoName;
+        const hpNode = index === 0 ? fighterOneHp : fighterTwoHp;
+
+        imageNode.src = fighter.image;
+        imageNode.alt = `${fighter.name} image`;
+        imageNode.hidden = !fighter.image;
+        nameNode.textContent = fighter.name;
+        hpNode.textContent = `HP: ${fighter.hp.toFixed(1)}%`;
+    }
+
+    function renderFighters() {
+        renderFighterPanel(0);
+        renderFighterPanel(1);
+    }
+
+    function chooseAction(attacker) {
+        // Rules requested: special attack >=3 turns, special defense >=2 turns.
+        const canUseSpecialAttack = attacker.turnsTaken >= 3 && attacker.turnsTaken - attacker.lastSpecialAttackTurn >= 3;
+        const canUseSpecialDefense = attacker.turnsTaken >= 2 && attacker.turnsTaken - attacker.lastSpecialDefenseTurn >= 2;
+        const roll = Math.random();
+
+        if (canUseSpecialAttack && roll < 0.34) {
+            return "special-attack";
+        }
+
+        if (canUseSpecialDefense && roll < 0.58) {
+            return "special-defense";
+        }
+
+        return "basic-attack";
+    }
+
+    function resolveAttack(attacker, defender, action, turnNumber) {
+        // Random miss chance applies to both normal and special attacks.
+        const attackFailed = Math.random() < (action === "special-attack" ? 0.22 : 0.18);
+
+        if (attackFailed) {
+            addBattleLog(`Turn ${turnNumber} · ${attacker.name} used ${action} but missed.`);
+            return;
+        }
+
+        const baseDamage = action === "special-attack"
+            ? randomInt(18, 32) + Math.round(attacker.specialAttackStat / 25)
+            : randomInt(10, 20) + Math.round(attacker.attackStat / 30);
+
+        let finalDamage = baseDamage;
+
+        // Defender shield can absorb damage, but shield itself can fail randomly.
+        if (defender.hasShield) {
+            const shieldFailed = Math.random() < 0.15;
+            if (shieldFailed) {
+                addBattleLog(`Turn ${turnNumber} · ${defender.name}'s special defense failed.`);
+            } else {
+                // Successful shield reduces incoming damage by 60%.
+                finalDamage = Math.max(1, Math.round(baseDamage * 0.4));
+                addBattleLog(`Turn ${turnNumber} · ${defender.name} blocked part of the damage.`);
+            }
+
+            defender.hasShield = false;
+        }
+
+        finalDamage = Math.max(1, finalDamage);
+        defender.hp = Math.max(0, defender.hp - finalDamage);
+
+        if (action === "special-attack") {
+            // Cooldown checkpoint for next special attack use.
+            attacker.lastSpecialAttackTurn = attacker.turnsTaken;
+        }
+
+        addBattleLog(`Turn ${turnNumber} · ${attacker.name} used ${action}, dealt ${finalDamage} damage, and left ${defender.name} at ${defender.hp.toFixed(1)}%.`);
+    }
+
+    function resolveDefense(attacker, turnNumber) {
+        // Defense can also fail randomly as requested by rules.
+        const defenseFailed = Math.random() < 0.2;
+        if (defenseFailed) {
+            addBattleLog(`Turn ${turnNumber} · ${attacker.name} tried special-defense, but it failed.`);
+            return;
+        }
+
+        attacker.hasShield = true;
+        // Cooldown checkpoint for next special defense use.
+        attacker.lastSpecialDefenseTurn = attacker.turnsTaken;
+        addBattleLog(`Turn ${turnNumber} · ${attacker.name} activated special-defense for the next hit.`);
+    }
+
+    async function loadFightersFromInputs() {
+        const firstQuery = fighterOneInput.value.trim();
+        const secondQuery = fighterTwoInput.value.trim();
+
+        if (!firstQuery || !secondQuery) {
+            // Force both contenders to avoid invalid battle state.
+            status.textContent = "Enter both fighters (id or name) before loading.";
+            return;
+        }
+
+        try {
+            status.textContent = "Loading fighters from PokéAPI...";
+            loadButton.disabled = true;
+            startButton.disabled = true;
+
+            const [firstData, secondData] = await Promise.all([
+                // Both requests run in parallel to reduce waiting time.
+                fetchBattlePokemon(firstQuery),
+                fetchBattlePokemon(secondQuery),
+            ]);
+
+            fighters = [toBattleFighter(firstData), toBattleFighter(secondData)];
+            log.innerHTML = "";
+            winnerWrap.hidden = true;
+            renderFighters();
+            status.textContent = `${fighters[0].name} vs ${fighters[1].name} ready. Press Start battle.`;
+            startButton.disabled = false;
+        } catch {
+            status.textContent = "Could not load one of the fighters. Verify id or name.";
+        } finally {
+            loadButton.disabled = false;
+        }
+    }
+
+    async function runBattle() {
+        if (isBattleRunning) {
+            // Ignore extra clicks while battle loop is active.
+            return;
+        }
+
+        if (!fighters[0] || !fighters[1]) {
+            status.textContent = "Load both fighters first.";
+            return;
+        }
+
+        isBattleRunning = true;
+        loadButton.disabled = true;
+        startButton.disabled = true;
+        log.innerHTML = "";
+        winnerWrap.hidden = true;
+
+        // Reset combat state while keeping fighter identity and artwork.
+        fighters = fighters.map((fighter) => ({
+            ...fighter,
+            hp: 100,
+            hasShield: false,
+            turnsTaken: 0,
+            lastSpecialAttackTurn: -999,
+            lastSpecialDefenseTurn: -999,
+        }));
+        renderFighters();
+
+        let turnNumber = 1;
+        let attackerIndex = 0;
+
+        while (fighters[0].hp > 0 && fighters[1].hp > 0) {
+            const defenderIndex = attackerIndex === 0 ? 1 : 0;
+            const attacker = fighters[attackerIndex];
+            const defender = fighters[defenderIndex];
+
+            status.textContent = `Turn ${turnNumber}: ${attacker.name}'s move.`;
+            const action = chooseAction(attacker);
+
+            if (action === "special-defense") {
+                resolveDefense(attacker, turnNumber);
+            } else {
+                resolveAttack(attacker, defender, action, turnNumber);
+            }
+
+            attacker.turnsTaken += 1;
+            // Turn counter drives special move availability windows.
+            renderFighters();
+
+            if (defender.hp <= 0) {
+                break;
+            }
+
+            turnNumber += 1;
+            attackerIndex = defenderIndex;
+            await sleep(900);
+        }
+
+        const winner = fighters[0].hp > 0 ? fighters[0] : fighters[1];
+        // Final winner panel requested in requirements.
+        winnerImage.src = winner.image;
+        winnerImage.alt = `${winner.name} winner image`;
+        winnerName.textContent = `${winner.name} is the winner!`;
+        winnerWrap.hidden = false;
+        status.textContent = `Battle finished in ${turnNumber} turns.`;
+        addBattleLog(`Battle result · ${winner.name} wins.`);
+
+        isBattleRunning = false;
+        loadButton.disabled = false;
+        startButton.disabled = false;
+    }
+
+    loadButton.addEventListener("click", () => {
+        // Fire-and-forget with internal error/status handling.
+        void loadFightersFromInputs();
+    });
+
+    startButton.addEventListener("click", () => {
+        // Fire-and-forget to keep click handler synchronous.
+        void runBattle();
+    });
 }
 
 // Attach login behavior if login form is present.
@@ -785,6 +1113,7 @@ function wireRegisterForm() {
 
 // Boot sequence for every page.
 document.addEventListener("DOMContentLoaded", async () => {
+    // Startup order matters: auth guard first, then shared layout, then page modules.
     ensureSeedUser();
     protectInteriorPages();
     await renderSharedLayout();
@@ -793,4 +1122,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     wireRegisterForm();
     hydrateProfilePage();
     await hydratePokemonPage();
+    await hydratePokemonBattleGame();
 });
